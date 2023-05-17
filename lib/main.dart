@@ -29,32 +29,20 @@ class _MyHomePageState extends State<MyHomePage> {
   List<String?> selectedReason = [];
   final timeList = ['10', '20', '30', '40'];
   List<String?> selectedTime = [];
-  bool isOpened1 = false;
-  bool isOpened2 = false;
 
   OverlayEntry? overlayEntry;
   var layerList = [];
-
-  // 열 추가
-  void addRow() {
-    layerList.add([LayerLink(), LayerLink()]);
-    selectedReason = [null, ...selectedReason];
-    selectedTime = ['10', ...selectedTime];
-  }
-
-  // 열 제거
-  void deleteRow(int index) {
-    layerList.removeAt(index);
-    selectedReason.removeAt(index);
-    selectedTime.removeAt(index);
-  }
+  var overlayStsList = [];
+  bool isOpened = false;
+  int submitTime = 0;
+  num? delayedTime;
 
   // 드롭다운 생성.
   void createReasonOverlay(int index) {
     if (overlayEntry == null) {
       overlayEntry = _customDropdown(layerList[index].first, reasonList, index);
       Overlay.of(context).insert(overlayEntry!);
-      isOpened1 = true;
+      isOpened = true;
     }
   }
 
@@ -62,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
     if (overlayEntry == null) {
       overlayEntry = _customDropdown(layerList[index].last, timeList, index);
       Overlay.of(context).insert(overlayEntry!);
-      isOpened2 = true;
+      isOpened = true;
     }
   }
 
@@ -70,8 +58,32 @@ class _MyHomePageState extends State<MyHomePage> {
   void removeOverlay() {
     overlayEntry?.remove();
     overlayEntry = null;
-    isOpened1 = false;
-    isOpened2 = false;
+    isOpened = false;
+  }
+
+  void addRow() {
+    removeOverlay();
+    layerList = [
+      [LayerLink(), LayerLink()],
+      ...layerList
+    ];
+    selectedReason = [null, ...selectedReason];
+    selectedTime = ['10', ...selectedTime];
+  }
+
+  void deleteRow(int index) {
+    removeOverlay();
+    List<String?> newList1 = [...selectedReason];
+    newList1.removeAt(index);
+    selectedReason = newList1;
+
+    List<String?> newList2 = [...selectedTime];
+    newList2.removeAt(index);
+    selectedTime = newList2;
+
+    var newList3 = [...layerList];
+    newList3.removeAt(index);
+    layerList = newList3;
   }
 
   @override
@@ -108,11 +120,10 @@ class _MyHomePageState extends State<MyHomePage> {
       children: [
         InkWell(
           onTap: () {
-            if (isOpened1 == false) {
-              createReasonOverlay(index);
-              return;
+            if (isOpened == true) {
+              removeOverlay();
             }
-            removeOverlay();
+            createReasonOverlay(index);
           },
           child: CompositedTransformTarget(
             link: layerList[index].first,
@@ -130,11 +141,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
         InkWell(
           onTap: () {
-            if (isOpened2 == false) {
-              createTimeOverlay(index);
-              return;
+            if (isOpened == true) {
+              removeOverlay();
             }
-            removeOverlay();
+            createTimeOverlay(index);
           },
           child: CompositedTransformTarget(
             link: layerList[index].last,
